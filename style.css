@@ -6,3 +6,5 @@
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*{transition:none!important}}
 
 footer p{line-height:1.9}
+
+.brand>.brand-name{font-size:inherit;color:inherit;margin-left:0}.brand:hover{text-decoration:none}.brand:hover .brand-name{text-decoration:underline;text-underline-offset:5px}
