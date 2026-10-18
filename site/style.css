@@ -7,4 +7,4 @@
 
 footer p{line-height:1.9}
 
-.brand-name{color:var(--ink)}.brand:hover{text-decoration:none}.brand:hover .brand-name{text-decoration:underline;text-underline-offset:5px}.brand:hover .brand-star{color:#7d9561;text-decoration:none}
+.brand .brand-name,.brand:visited .brand-name,.brand:hover .brand-name{color:#233f35}.brand:hover{text-decoration:none}.brand:hover .brand-name{text-decoration:underline;text-underline-offset:5px}.brand:hover .brand-star{color:#7d9561;text-decoration:none}
