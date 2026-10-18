@@ -1,259 +1,201 @@
-# Scoleaf - AI-Powered PDF Analysis Application
+<div align="center">
+  <img src="frontend/public/siteicon.svg" alt="Scoleaf icon" width="64" />
+  <h1>Scoleaf</h1>
+  <p>A personal AI tutor for your PDFs, with voice conversations and visual explanations.</p>
+  <p><a href="https://kcharvi.github.io/scoleaf/">Project website</a> · <a href="https://kcharvi.github.io/scoleaf/#demo">Watch the demo</a> · <a href="#run-locally">Run locally</a></p>
+</div>
 
-[Project website and recorded demo](https://kcharvi.github.io/scoleaf/)
+Scoleaf puts a document viewer beside an AI tutor. Upload a PDF, ask a question by text or voice, and follow the explanation through document highlights, diagrams, and equations. Follow-up questions keep the conversation connected to the material you are reading.
 
-An intelligent PDF analysis application that allows users to interact with their documents through an AI-powered chat interface. The system provides explanations and dynamically highlights relevant text, tables, and images directly within the document viewer.
+The public website is a **project showcase with a recorded demo**. The working application runs separately and requires the services and credentials described below. The recording shows an earlier project name, PiTutor.
 
+## Features
 
- 
-## 🚀 Features
+- **Document conversations:** ask for summaries, explanations, or follow-up answers grounded in an uploaded PDF.
+- **Text and voice modes:** use typed chat or a real-time voice session powered by LiveKit and Google's Gemini Live integration.
+- **Source-linked highlights:** locate relevant passages, navigate to them, and organize highlights into General, Important, and Thoughts categories.
+- **Visual explanations:** generate Mermaid diagrams and mathematical explanations alongside the conversation.
+- **Multilingual tutoring:** request explanations in another language through the voice tutor.
+- **Accounts and uploads:** Supabase authentication, user profiles, upload counts, and PDF storage support the learning workflow.
 
-### Core Functionality
-- **PDF Upload & Processing**: Upload PDF documents and extract content with precise coordinates using PyMuPDF
-- **AI-Powered Chat**: Interactive chat interface using Google Gemini 2.5 Flash for intelligent document analysis
-- **Dynamic Highlighting**: Automatically highlight relevant document sections based on AI responses
-- **Coordinate-Based Highlighting**: Precise text highlighting with exact positioning for click-to-navigate functionality
-- **Session Management**: Maintain conversation state and context across multiple queries
-- **Category-Based Highlights**: Three highlight categories (General, Important, Thoughts) with visual distinctions
+## Architecture
 
-### User Interface
-- **Modern Frontend**: Built with React, TypeScript, and Tailwind CSS with Notion-like UI
-- **PDF Viewer**: Integrated PDF viewer with highlighting capabilities using react-pdf-highlighter-extended
-- **Responsive Design**: Works seamlessly across different screen sizes
-- **Real-time Updates**: Live chat interface with instant AI responses and highlighting
+| Layer | Technologies | Responsibility |
+| --- | --- | --- |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, Zustand | Document viewer, chat, highlights, and voice-session controls |
+| Document interface | react-pdf-highlighter-extended, Mermaid, KaTeX | PDF annotations, diagrams, and mathematical rendering |
+| API | Python, FastAPI, Pydantic | Upload processing, chat sessions, LiveKit tokens, and user profiles |
+| Document processing | PyMuPDF, PyPDF2 | Extract PDF content and coordinates for highlighting |
+| AI and voice | Google Gemini, LiveKit Agents | Text answers, real-time voice, and tutor tool calls |
+| Authentication and storage | Supabase Auth, Postgres, Storage | Sign-in, profiles, upload counts, and stored PDFs |
 
-### Technical Features
-- **RESTful API**: FastAPI backend with comprehensive endpoint documentation
-- **CORS Support**: Properly configured for frontend-backend communication
-- **Error Handling**: Robust error handling and user feedback
-- **Health Monitoring**: Health check endpoints for system monitoring
+The API and the LiveKit agent run as separate Python processes. Local PDF files and processed caches are stored under `backend/uploads/`; Supabase Storage provides document URLs used by remote components.
 
-## 🏗️ Architecture
+## Run locally
 
-### Frontend (React + TypeScript)
-- **Framework**: React 18 with TypeScript
-- **UI Library**: Tailwind CSS with custom Notion-inspired styling
-- **PDF Handling**: react-pdf-highlighter-extended for document viewing and highlighting
-- **State Management**: Zustand for efficient state management
-- **HTTP Client**: Axios for API communication
-- **Build Tool**: Vite for fast development and building
+### Prerequisites
 
-### Backend (FastAPI + Python)
-- **Framework**: FastAPI for high-performance async API
-- **AI Integration**: Google Gemini 2.5 Flash for document analysis
-- **PDF Processing**: PyMuPDF (fitz) for robust document parsing with coordinate extraction
-- **Authentication**: JWT-based authentication (ready for extension)
-- **Storage**: File system storage (easily extensible to cloud storage)
+- Node.js 18+ and npm for the frontend.
+- Python 3.12 recommended for the pinned backend dependencies.
+- A Google AI API key with access to the models used by the application.
+- A Supabase project with email authentication, a `profiles` table, and a PDF storage bucket.
+- A LiveKit server or LiveKit Cloud project for voice mode.
 
-## 📋 Prerequisites
+The setup commands below use a macOS/Linux shell.
 
-### System Requirements
-- **Node.js**: 18.0 or higher
-- **Python**: 3.9 or higher
-- **npm**: 8.0 or higher
-- **Google AI API Key**: Required for AI features
+### 1. Clone and install
 
-### API Keys
-1. **Google AI API Key**: 
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy the key for configuration
-
-## 🛠️ Installation & Setup
-
-### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/kcharvi/scoleaf.git
 cd scoleaf
+
+python3.12 -m venv backend/venv
+source backend/venv/bin/activate
+python -m pip install -r backend/requirements.txt
+
+cd frontend
+npm ci --legacy-peer-deps
+cd ..
 ```
 
-### 2. Backend Setup
+### 2. Configure the backend
 
-#### Install Dependencies
+Create `backend/.env` with your own values:
+
+```dotenv
+GOOGLE_API_KEY=your_google_ai_api_key
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_backend_supabase_key
+SUPABASE_STORAGE_BUCKET=pdfs
+
+LIVEKIT_URL=wss://your-project.livekit.cloud
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_API_SECRET=your_livekit_api_secret
+
+HOST=0.0.0.0
+PORT=8000
+DEBUG=true
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE_MB=50
+ALLOWED_ORIGINS=["http://localhost:3000"]
+```
+
+Keep backend keys in this local file or your server's environment. Use only the Supabase anonymous/public key in the frontend; never put a service-role key there. Environment files, uploads, caches, and build outputs are excluded by `.gitignore`.
+
+**Supabase setup:** the code expects a `profiles` table with an `id` matching the authenticated user's ID and an `upload_count` field. Arrange profile creation for new users and configure appropriate access policies and the `pdfs` storage bucket. This repository currently does not include database migrations, profile-creation triggers, or storage-policy definitions, so creating a Supabase project alone is insufficient.
+
+### 3. Configure the frontend
+
+Create `frontend/.env`:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Use the same Supabase project as the backend. The API URL includes `/api`.
+
+### 4. Start the API
+
+From the repository root, open a terminal and run:
+
 ```bash
 cd backend
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-#### Configure Environment
-```bash
-# Set your Google AI API key
-export GOOGLE_API_KEY="your_google_api_key_here"
-
-# Optional: Create .env file
-echo "GOOGLE_API_KEY=your_google_api_key_here" > .env
-```
-
-#### Start the Backend
-```bash
 source venv/bin/activate
+set -a
+source .env
+set +a
 python run.py
 ```
 
-The backend will start on `http://localhost:8000`
+Loading `.env` into the shell also supplies the LiveKit token endpoint, which reads its credentials directly from the process environment.
 
-### 3. Frontend Setup
+### 5. Start the voice agent
 
-#### Install Dependencies 
-```bash
-cd frontend
-npm install
-```
+In a second terminal, starting from the repository root:
 
-#### Start the Frontend
-```bash
-npm run dev
-```
-
-The frontend will start on `http://localhost:3000`
-
-## 🚀 Usage
-
-### 1. Upload a PDF Document
-- Navigate to `http://localhost:3000`
-- Upload a PDF file using the upload interface
-- Wait for the document to be processed and loaded
-
-### 2. Start Chatting
-- Use the chat interface on the right panel
-- Ask questions about your PDF document:
-  - "Summarize the key findings"
-  - "What are the main conclusions?"
-  - "Explain the methodology used"
-  - "Show me the important statistics"
-
-### 3. Interactive Highlighting
-- AI responses will automatically highlight relevant text in the PDF
-- Click on highlighted sections to navigate to specific parts
-- View all highlights in the highlights sidebar
-- Highlights are categorized as General, Important, or Thoughts
-
-### 4. Session Management
-- Conversations are maintained across queries
-- Chat history provides context for follow-up questions
-- Clear chat history when starting a new analysis
-
-## 📚 API Documentation
-
-### Backend Endpoints
-
-#### Health Check
-- `GET /api/health/` - Basic health check
-- `GET /api/health/detailed` - Detailed system status
-- `GET /api/health/ai-status` - AI service connectivity
-
-#### File Upload
-- `POST /api/upload/` - Upload PDF file
-- `GET /api/upload/files` - List uploaded files
-- `GET /api/upload/files/{file_id}` - Get file information
-- `DELETE /api/upload/files/{file_id}` - Delete file
-
-#### Chat Interface
-- `POST /api/chat/text` - Send chat message
-- `POST /api/chat/session` - Create chat session
-- `GET /api/chat/history/{session_id}` - Get chat history
-- `DELETE /api/chat/session/{session_id}` - Clear session
-- `POST /api/chat/analyze` - One-off document analysis
-
-#### Interactive API Documentation
-- Visit `http://localhost:8000/docs` for Swagger UI
-- Visit `http://localhost:8000/redoc` for ReDoc documentation
-
-## 🔧 Configuration
-
-### Backend Configuration
-Environment variables can be set in `.env` file or as system environment variables:
-
-```env
-# Google AI API Key (required)
-GOOGLE_API_KEY=your_google_api_key_here
-
-# Application Settings
-DEBUG=True
-UPLOAD_DIR=./uploads
-MAX_FILE_SIZE_MB=50
-
-# CORS Settings
-FRONTEND_URL=http://localhost:3000
-
-# Server Settings
-HOST=0.0.0.0
-PORT=8000
-```
-
-### Frontend Configuration
-The frontend automatically connects to the backend at `http://localhost:8000`. Modify `vite.config.ts` for custom backend URLs.
-
-## 🧪 Testing
-
-### Backend Testing
 ```bash
 cd backend
 source venv/bin/activate
-pytest
+python run_agent.py dev
 ```
 
-### Frontend Testing
+The agent loads `backend/.env` and connects to the LiveKit project configured there. The API, agent, and browser must use the same LiveKit server.
+
+### 6. Start the frontend
+
+In a third terminal, starting from the repository root:
+
 ```bash
 cd frontend
-npm test
+npm run dev
 ```
 
-### Manual API Testing
+Open [localhost:3000](http://localhost:3000), sign in, and upload a PDF. Choose **Text** for chat or **Speak** for voice, and allow microphone access when using voice mode. Ask a question, inspect the associated highlights, and continue with follow-up questions.
+
+With `DEBUG=true`, API documentation is available at [localhost:8000/docs](http://localhost:8000/docs).
+
+## Current limits and setup notes
+
+- Regular accounts have a three-upload limit. The upload route checks for PDFs of up to 20 pages; the configured file-size limit defaults to 50 MB.
+- The code references `gemini-2.5-flash` for text, `gemini-2.0-flash` for diagrams, and `gemini-live-2.5-flash-preview` for voice. These are repository defaults, not guarantees of current provider availability. If a model is unavailable to your account, update its ID in the corresponding service or agent file.
+- Chat sessions and processed documents use local application state and file caches. This is a prototype, and some file/chat endpoints do not enforce per-user authorization. Review those routes before deploying a shared instance.
+- PDF context and voice-session data are sent to the configured AI and voice services. Local development does not imply offline processing.
+
+## Development
+
+Build the frontend, including its TypeScript check:
+
 ```bash
-# Test health endpoint
-curl http://localhost:8000/api/health/
-
-# Test file upload
-curl -X POST -F "file=@sample.pdf" http://localhost:8000/api/upload/
+cd frontend
+npm run build
 ```
 
-## 🤝 Contributing
+A frontend lint command is also defined as `npm run lint`. There is currently no frontend `npm test` script or checked-in automated test suite; the backend dependency list includes pytest, but no backend tests are included.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Check the API after starting it:
 
-## 📝 License
+```bash
+curl http://localhost:8000/api/health/
+curl http://localhost:8000/api/health/ai-status
+```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Useful entry points:
 
-## 🙏 Acknowledgments
+```text
+frontend/src/components/       Learning interface and document viewer
+frontend/src/services/api.ts  Frontend API client and backend URL
+frontend/src/store/            Conversation and highlight state
+backend/app/main.py           FastAPI application and chat routes
+backend/app/api/               Upload, health, account, and voice-token routes
+backend/app/services/          AI, document, and Supabase services
+backend/app/livekit_agent/     Voice tutor and document interaction tools
+site/                         Static project website and recorded demo
+Scripts/publish-site.sh        GitHub Pages publishing helper
+```
 
-- **Google Gemini 2.5 Flash** for powerful AI capabilities
-- **PyMuPDF** for robust PDF processing
-- **React PDF Highlighter Extended** for document viewing
-- **FastAPI** for the excellent async web framework
-- **Tailwind CSS** for beautiful styling
+## Project website
 
-## 🔮 Future Enhancements
+The showcase is published at **[kcharvi.github.io/scoleaf](https://kcharvi.github.io/scoleaf/)**. Its source is in `site/`, and GitHub Pages serves the `gh-pages` branch.
 
-- **Speech Mode**: Voice interaction capabilities (prepared for Gemini Live API)
-- **Multi-language Support**: Support for documents in multiple languages
-- **Cloud Storage**: Integration with cloud storage providers
-- **User Authentication**: Multi-user support with authentication
-- **Document Comparison**: Compare multiple documents side by side
-- **Export Features**: Export highlights and summaries
-- **Mobile App**: React Native mobile application
+After editing and reviewing the site, publish it from the repository root:
 
-## 📞 Support
+```bash
+bash Scripts/publish-site.sh
+```
 
-For support, email your-email@example.com or create an issue in the repository.
+This publishes the static project page, not the FastAPI backend or the voice agent.
 
-## 🏃‍♂️ Quick Start Summary
+## Collaboration
 
-1. **Backend**: `cd backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
-2. **Set API Key**: `export GOOGLE_API_KEY="your_key_here"`
-3. **Start Backend**: `python run.py`
-4. **Frontend**: `cd frontend && npm install && npm run dev`
-5. **Access**: Open `http://localhost:3000` in your browser
-6. **Upload PDF**: Use the upload interface to add your document
-7. **Start Chatting**: Ask questions about your PDF and see intelligent highlighting!
+A project by **[Charvi Kusuma](https://kcharvi.github.io/)**, in collaboration with **[Reddi Tarun](http://redditarun.github.io/)**.
 
----
+## Contributing
 
-**Built with ❤️ for researchers, lawyers, and professionals who work with documents.** 
+Use [GitHub Issues](https://github.com/kcharvi/scoleaf/issues) for bugs or suggestions. Include the affected text/voice flow, reproduction steps, and relevant error messages without credentials or private documents. Open a pull request with a focused change and describe how you checked it.
+
+## License
+
+There is currently no repository-level `LICENSE` file. The frontend package metadata declares ISC; dependency licenses remain with their respective authors.
