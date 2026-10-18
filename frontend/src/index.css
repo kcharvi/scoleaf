@@ -1,0 +1,341 @@
+/* Import PDF.js CSS */
+@import 'pdfjs-dist/web/pdf_viewer.css';
+
+/* Import react-pdf-highlighter-extended individual CSS files */
+@import 'react-pdf-highlighter-extended/dist/esm/style/PdfHighlighter.css';
+@import 'react-pdf-highlighter-extended/dist/esm/style/TextHighlight.css';
+@import 'react-pdf-highlighter-extended/dist/esm/style/AreaHighlight.css';
+@import 'react-pdf-highlighter-extended/dist/esm/style/MouseSelection.css';
+@import 'react-pdf-highlighter-extended/dist/esm/style/pdf_viewer.css';
+
+/* Custom color variables */
+:root {
+  --color-dust: #D1A980;
+  --color-leaf: #748873;
+  --color-stone: #E5E0D8;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-notion-gray-100 text-notion-gray-700;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .notion-button {
+    @apply inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ease-in-out;
+    @apply hover:bg-notion-gray-200 active:bg-notion-gray-300 focus:outline-none focus:ring-2 focus:ring-notion-blue-500 focus:ring-offset-1;
+  }
+  
+  .notion-button-primary {
+    @apply bg-notion-blue-500 text-white hover:bg-notion-blue-600 focus:ring-notion-blue-500;
+  }
+  
+  .notion-input {
+    @apply w-full px-3 py-2 text-sm bg-white border border-notion-gray-300 rounded-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-notion-blue-500 focus:border-transparent;
+    @apply placeholder-notion-gray-500 transition-all duration-200;
+  }
+  
+  .notion-card {
+    @apply bg-white rounded-lg border border-notion-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .notion-sidebar {
+    @apply bg-notion-gray-200 border-r border-notion-gray-300;
+  }
+  
+  .notion-text {
+    @apply text-notion-gray-700 leading-relaxed;
+  }
+  
+  .notion-text-muted {
+    @apply text-notion-gray-500 text-sm;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-leaf);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #748873cc;
+}
+
+/* ======================
+   PDF VIEWER FIXES
+   ====================== */
+
+/* Main PDF Highlighter Container */
+.PdfHighlighter {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto !important;
+  background: #ffffff !important;
+}
+
+/* PDF Highlighter Content - Allow natural height for all pages */
+.PdfHighlighter__content {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100% !important;
+  padding: 20px 0 !important;
+}
+
+/* Individual PDF Pages - Critical for proper loading */
+.react-pdf__Page {
+  display: block !important;
+  position: relative !important;
+  margin: 0 auto 20px auto !important;
+  background: white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  overflow: visible !important;
+  max-width: 90% !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* PDF Page Canvas - Ensure proper rendering */
+.react-pdf__Page__canvas {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 8px !important;
+}
+
+/* Text Layer - Critical for text selection */
+.react-pdf__Page__textContent {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: hidden !important;
+  opacity: 0.2 !important;
+  line-height: 1 !important;
+}
+
+.react-pdf__Page__textContent span {
+  color: transparent !important;
+  position: absolute !important;
+  white-space: pre !important;
+  cursor: text !important;
+  transform-origin: 0 0 !important;
+}
+
+/* Annotations Layer */
+.react-pdf__Page__annotations {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: hidden !important;
+}
+
+/* PDF Document Container */
+.react-pdf__Document {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* ======================
+   HIGHLIGHT TIPS FIXES
+   ====================== */
+
+/* Highlight Tips - Fixed positioning to stay in viewport */
+.PdfHighlighter__tip {
+  position: fixed !important;
+  z-index: 9999 !important;
+  max-width: 350px !important;
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure tips don't go off screen */
+.PdfHighlighter__tip {
+  transform: translateY(-100%) !important;
+}
+
+.PdfHighlighter__tip[style*="top"] {
+  max-height: 50vh !important;
+}
+
+/* All tip elements */
+[data-element="tip"] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  max-width: 350px !important;
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+}
+
+/* ======================
+   HIGHLIGHT STYLES
+   ====================== */
+
+/* Text Highlights */
+.react-pdf-highlighter__text-highlight {
+  border-radius: 3px !important;
+  transition: all 0.2s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+.react-pdf-highlighter__text-highlight:hover {
+  transform: scale(1.01) !important;
+  opacity: 0.9 !important;
+}
+
+/* Area Highlights */
+.react-pdf-highlighter__area-highlight {
+  border-radius: 6px !important;
+  transition: all 0.2s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+.react-pdf-highlighter__area-highlight:hover {
+  opacity: 0.8 !important;
+}
+
+/* Mouse Selection */
+.react-pdf-highlighter__mouse-selection {
+  background: rgba(35, 131, 226, 0.25) !important;
+  border: 2px solid rgba(35, 131, 226, 0.6) !important;
+  border-radius: 4px !important;
+}
+
+/* ======================
+   SCROLLING & PERFORMANCE
+   ====================== */
+
+/* Smooth scrolling for PDF container */
+.PdfHighlighter {
+  scroll-behavior: smooth !important;
+}
+
+/* Ensure pages render as they come into view */
+.react-pdf__Page {
+  will-change: transform !important;
+  contain: layout style paint !important;
+}
+
+/* ======================
+   RESPONSIVE DESIGN
+   ====================== */
+
+@media (max-width: 768px) {
+  .react-pdf__Page {
+    max-width: 95% !important;
+    margin: 0 auto 15px auto !important;
+  }
+  
+  .PdfHighlighter__tip {
+    max-width: 280px !important;
+    max-height: 40vh !important;
+  }
+}
+
+/* ======================
+   LOADING STATES
+   ====================== */
+
+.react-pdf__Page--loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%) !important;
+  background-size: 200% 100% !important;
+  animation: loading 1.5s infinite !important;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Force all pages to be visible and rendered */
+.react-pdf__Page[data-page-number] {
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* custom scrollbar for pdf */
+.pdf-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.pdf-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pdf-scroll::-webkit-scrollbar-thumb {
+  background-color: #748873;
+  border-radius: 9999px;
+}
+
+/* Firefox */
+.pdf-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #748873 transparent;
+}
+
+.pdf-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.6); }
+  50% { transform: scaleY(1); }
+}
+.animate-wave {
+  animation: wave 1s infinite ease-in-out;
+}
+.delay-75 { animation-delay: .15s; }
+.delay-150 { animation-delay: .3s; }
+
+.bg-dots-pattern {
+  background-image: radial-gradient(circle at center, theme('colors.slate.300') 1px, transparent 1px);
+  background-size: 1rem 1rem;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+} 
+
+/* Hide only Mermaid error SVGs as a fallback */
+svg[aria-roledescription="error"] {
+  display: none !important;
+} 

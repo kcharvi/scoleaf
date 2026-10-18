@@ -1,0 +1,22 @@
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Dependencies and generated files
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+frontend/dist/
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# Uploaded documents and local caches
+backend/uploads/
+backend/cache/
