@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kcharvi.github.io/scoleaf/sitemap.xml

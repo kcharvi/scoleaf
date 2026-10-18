@@ -1,5 +1,7 @@
 # Scoleaf - AI-Powered PDF Analysis Application
 
+[Project website and recorded demo](https://kcharvi.github.io/scoleaf/)
+
 An intelligent PDF analysis application that allows users to interact with their documents through an AI-powered chat interface. The system provides explanations and dynamically highlights relevant text, tables, and images directly within the document viewer.
 
 
